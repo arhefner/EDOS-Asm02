@@ -1,5 +1,11 @@
+Asm/02 for ELF-DOS
+
 Usage:
   asm02 [options] filename
+
+  The filename may include a drive letter and a path, and must include
+  its extension.  The object file is written beside the source file with
+  the extension .obj, and the list file with the extension .lst.
 
 Command line options:
      -1805        - Enable 1804/5/6 instructions
@@ -10,7 +16,9 @@ Command line options:
      -Dname=value - Define name with specified value
 
 Preprocessor
-  #include file       - Include specified file
+  #include file       - Include specified file.  A file without a path
+                        is looked for in the current directory.  Include
+                        files may be nested 4 deep.
   #define name        - Define name as '1'
   #define name string - Define name as specified string
   #ifdef name         - Condition if name is defined
@@ -21,6 +29,10 @@ Preprocessor
   #error message      - Display message and increment error count
 
   note: #define substitution on source lines does occur
+
+Labels:
+  A label is matched without regard to case where it is used, but only
+  if it was written in lower case where it was defined.
 
 Assembler directives:
   .1805        - Enable 1805 instructions

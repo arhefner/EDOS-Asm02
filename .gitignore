@@ -1,7 +1,6 @@
-asm02.bin
+/asm02
+*.prg
 *.build
 *.lst
-*.l
-*.prg
+*.lkb
 *.sym
-

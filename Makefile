@@ -1,110 +1,42 @@
-PROJECT = asm02
-INCDIR=../../Include
-LIBDIR=../../Lib
-INSTDIR=../../Image/bin
-OBJS = \
-	adddefine.prg \
-	addlabel.prg \
-	appendext.prg \
-	asmpass.prg \
-	check1805.prg \
-	checkeom.prg \
-	checkrange.prg \
-	convertnum.prg \
-	defreplace.prg \
-	directive.prg \
-	div16.prg \
-	dopublics.prg \
-	error.prg \
-	final.prg \
-	finddefine.prg \
-	findlabel.prg \
-	fopen.prg \
-	getarg.prg \
-	initasm.prg \
-	isrreg.prg \
-	itoa16.prg \
-	labelchar.prg \
-	ltrim.prg \
-	ltrimrf.prg \
-	lookupop.prg \
-	mdnorm16.prg \
-	mul16.prg \
-	nextline.prg \
-	opdb.prg \
-	opds.prg \
-	opdw.prg \
-	opend.prg \
-	opendp.prg \
-	opequ.prg \
-	opeever.prg \
-	opever.prg \
-	opextrn.prg \
-	opinp.prg \
-	opldn.prg \
-	oporg.prg \
-	opout.prg \
-	oppop.prg \
-	opproc.prg \
-	oppublic.prg \
-	oppush.prg \
-	output.prg \
-	opver.prg \
-	readln.prg \
-	replace.prg \
-	showsymbols.prg \
-	strcasecmpin.prg \
-	strcmpin.prg \
-	strstr.prg \
-	tobcd16.prg \
-	tohex.prg \
-	tolc.prg\
-	touc.prg \
-	writeextrn.prg \
-	writelocal.prg \
-	writeln.prg \
-	writelstfile.prg \
-	writeoutput.prg \
-	main.prg
+# EDOS-Asm02 - the Asm/02 assembler for ELF-DOS.
+#
+# Needs Asm/02 and Link/02. "make" assembles everything in src/ and
+# links the assembler as ./asm02, ready to copy onto an ELF-DOS volume.
 
-.SUFFIXES: .asm .prg
+ASM     ?= /opt/elfc/asm02
+LINK    ?= /opt/elfc/link02
 
-$(PROJECT).bin: $(OBJS)
-	asm02 -l -L -I$(INCDIR) main.asm
-	link02 -s -S symbols.sym -e @link.lnk -o $(PROJECT).bin
+ASMFLAGS ?= -L -I../elfdos-sdk
+LFLAGS   ?= -b -be
 
-.asm.prg:
-	asm02 -l -L -I$(INCDIR) $<
+# main.prg must be first: it holds the program header at PROG_BASE.
+# final.prg must be last: the label table starts where the program
+# ends and grows upward from there.
+MODULES = main adddefine addlabel appendext asmpass check1805 checkeom \
+	checkrange convertnum defreplace directive div16 dopublics dosio \
+	error finddefine findlabel fopen getarg initasm isrreg itoa16 \
+	labelchar lookupop ltrim ltrimrf mdnorm16 mul16 nextline opdb opds \
+	opdw opend opendp opequ opeever opever opextrn opinp opldn oporg \
+	opout oppop opproc oppublic oppush output opver readln replace \
+	showsymbols strcasecmpin strcmpin strstr tobcd16 tohex tolc touc \
+	writeextrn writelocal writeln writelstfile writeoutput final
+
+PRGS = $(patsubst %,src/%.prg,$(MODULES))
+
+HEADERS = src/include/asm02.inc elfdos-sdk/include/bios.inc \
+	elfdos-sdk/include/kernel_api.inc
+
+.PHONY: all clean
+
+all: asm02
+
+asm02: $(PRGS)
+	$(LINK) $(LFLAGS) -o asm02 $(PRGS)
+	rm -f asm02.lkb
+
+src/%.prg: src/%.asm $(HEADERS)
+	cd src && $(ASM) $(ASMFLAGS) $*.asm
 
 clean:
-	-rm *.prg
-	-rm *.bin
-	-rm *.lst
-	-rm symbols.sym
-
-lists:
-	adjlst adddefine.lst adddefine
-	adjlst addlabel.lst addlabel
-	adjlst asmpass.lst asmpass
-	adjlst check1805.lst check1805
-	adjlst convertnum.lst convertnum
-	adjlst defreplace.lst defreplace
-	adjlst directive.lst directive
-	adjlst dopublics.lst dopublics
-	adjlst final.lst final
-	adjlst finddefine.lst finddefine
-	adjlst fopen.lst fopen
-	adjlst getarg.lst getarg
-	adjlst initasm.lst initasm
-	adjlst labelchar.lst labelchar
-	adjlst nextline.lst nextline
-	adjlst opend.lst opend
-	adjlst oporg.lst oporg
-	adjlst opproc.lst opproc
-	adjlst output.lst output
-	adjlst readln.lst readln
-	adjlst replace.lst replace
-
-install: $(PROJECT).bin
-	cp $(PROJECT).bin $(INSTDIR)
-
+	rm -f asm02 asm02.lkb
+	rm -f src/*.prg src/*.lst src/*.build
