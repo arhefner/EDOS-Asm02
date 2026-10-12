@@ -26,6 +26,8 @@ The exit code is 0 when the file assembled without errors and non-zero otherwise
 Building
 --------
 The assembler is assembled and linked with the [Asm/02](https://github.com/arhefner/Asm-02) assembler and [Link/02](https://github.com/arhefner/Link-02) linker, the same versions used to build ELF-DOS. The Makefile expects them in `/opt/elfc`; set `ASM` and `LINK` to use them from somewhere else.
+
+**Asm/02 1.14 or later is required.** Earlier versions do not tell the linker about the bytes an `.align` skips, and `src/main.asm` ends with aligned file blocks: the assembler links without any error, but the module after `main` is placed over the end of the last file block and is overwritten when the program runs.
 ```
 make          # assemble src/*.asm and link ./asm02
 make clean
